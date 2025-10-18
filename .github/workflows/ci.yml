@@ -1,0 +1,41 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    env:
+      MPLBACKEND: Agg
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pandas numpy matplotlib lifelines openpyxl
+
+      - name: Generate sample data
+        run: |
+          python make_sample_data.py --out sample_ci.xlsx --n 50
+
+      - name: Run analysis
+        run: |
+          python main.py sample_ci.xlsx time event --group-col group --out-dir outputs
+
+      - name: Verify outputs
+        run: |
+          test -f outputs/km_plot.png
+          test -f outputs/km_loglog_plot.png
+          test -f outputs/weibull_plot.png
+          test -f outputs/weibull_loglog_plot.png
+          test -f outputs/km_summary.csv
+          test -f outputs/weibull_summary.csv

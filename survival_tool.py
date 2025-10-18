@@ -218,6 +218,32 @@ def weibull_analysis(
     plt.savefig(out_path.with_name("weibull_loglog_plot.png"), dpi=150)
     plt.close()
 
+    # Weibull probability plot (label y-axis in unreliability F(t) %)
+    # Using the same transformed y = ln(-ln(S)) values but labeling in F = 1-S space
+    plt.figure(figsize=(7, 5))
+    for label, tt, ss in loglog_series:
+        mask = (tt > 0) & (ss > 0) & (ss < 1)
+        if not np.any(mask):
+            continue
+        x = np.log(tt[mask])
+        y = np.log(-np.log(ss[mask]))
+        plt.plot(x, y, label=label)
+    if loglog_series:
+        plt.legend()
+    # Build Weibull probability y-ticks: common unreliability percentages
+    unreliab = np.array([0.01, 0.05, 0.1, 0.2, 0.3, 0.5, 0.7, 0.8, 0.9])
+    S_ticks = 1.0 - unreliab
+    y_ticks = np.log(-np.log(S_ticks))
+    y_labels = [f"{int(u*100)}%" for u in unreliab]
+    plt.yticks(y_ticks, y_labels)
+    plt.title("Weibull Probability Plot")
+    plt.xlabel("ln(time)")
+    plt.ylabel("Unreliability F(t)")
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.savefig(out_path.with_name("weibull_probability_plot.png"), dpi=150)
+    plt.close()
+
     return results
 
 
