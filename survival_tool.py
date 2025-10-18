@@ -63,6 +63,8 @@ def kaplan_meier_analysis(
     event_col: str,
     group_col: Optional[str] = None,
     out_path: Path = Path("outputs/km_plot.png"),
+    x_label: str = "Time",
+    title_prefix: str | None = None,
 ) -> List[KMResult]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -98,8 +100,11 @@ def kaplan_meier_analysis(
         ss = surv_df.iloc[:, 0].to_numpy(dtype=float)
         loglog_series.append(("All", tt, ss))
 
-    plt.title("Kaplan-Meier Survival Estimate")
-    plt.xlabel("Time")
+    title = "Kaplan-Meier Survival Estimate"
+    if title_prefix:
+        title = f"{title_prefix} - {title}"
+    plt.title(title)
+    plt.xlabel(x_label)
     plt.ylabel("Survival probability")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
@@ -122,7 +127,10 @@ def kaplan_meier_analysis(
         plt.plot(x, y, label=label)
     if loglog_series:
         plt.legend()
-    plt.title("KM Log-Log Survival Plot")
+    title = "KM Log-Log Survival Plot"
+    if title_prefix:
+        title = f"{title_prefix} - {title}"
+    plt.title(title)
     plt.xlabel("ln(time)")
     plt.ylabel("ln(-ln(S(t)))")
     plt.grid(True, alpha=0.3)
@@ -148,6 +156,8 @@ def weibull_analysis(
     group_col: Optional[str] = None,
     out_path: Path = Path("outputs/weibull_plot.png"),
     annotate_b10: bool = True,
+    x_label: str = "Time",
+    title_prefix: str | None = None,
 ) -> List[WeibullResult]:
     out_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -187,8 +197,11 @@ def weibull_analysis(
                 s = wf.survival_function_at_times(grid).to_numpy()
                 loglog_series.append((str(label), grid, s))
 
-    plt.title("Weibull Parametric Survival Fit")
-    plt.xlabel("Time")
+    title = "Weibull Parametric Survival Fit"
+    if title_prefix:
+        title = f"{title_prefix} - {title}"
+    plt.title(title)
+    plt.xlabel(x_label)
     plt.ylabel("Survival probability")
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
@@ -210,7 +223,10 @@ def weibull_analysis(
         plt.plot(x, y, label=label)
     if loglog_series:
         plt.legend()
-    plt.title("Weibull Log-Log Survival Plot")
+    title = "Weibull Log-Log Survival Plot"
+    if title_prefix:
+        title = f"{title_prefix} - {title}"
+    plt.title(title)
     plt.xlabel("ln(time)")
     plt.ylabel("ln(-ln(S(t)))")
     plt.grid(True, alpha=0.3)
@@ -236,7 +252,10 @@ def weibull_analysis(
     y_ticks = np.log(-np.log(S_ticks))
     y_labels = [f"{int(u*100)}%" for u in unreliab]
     plt.yticks(y_ticks, y_labels)
-    plt.title("Weibull Probability Plot")
+    title = "Weibull Probability Plot"
+    if title_prefix:
+        title = f"{title_prefix} - {title}"
+    plt.title(title)
     plt.xlabel("ln(time)")
     plt.ylabel("Unreliability F(t)")
     plt.grid(True, alpha=0.3)
@@ -254,6 +273,8 @@ def analyze_excel(
     group_col: Optional[str] = None,
     out_dir: Path = Path("outputs"),
     sheet: Optional[str] = None,
+    time_unit: Optional[str] = None,
+    title_prefix: Optional[str] = None,
 ) -> Tuple[List[KMResult], List[WeibullResult]]:
     df = load_excel(excel_path, sheet)
     # Basic validation
@@ -262,11 +283,25 @@ def analyze_excel(
         raise KeyError(f"Missing required columns: {missing}. Found: {list(df.columns)}")
     out_dir.mkdir(parents=True, exist_ok=True)
 
+    x_label = "Time" if not time_unit else f"Time ({time_unit})"
     km_results = kaplan_meier_analysis(
-        df, time_col=time_col, event_col=event_col, group_col=group_col, out_path=out_dir / "km_plot.png"
+        df,
+        time_col=time_col,
+        event_col=event_col,
+        group_col=group_col,
+        out_path=out_dir / "km_plot.png",
+        x_label=x_label,
+        title_prefix=title_prefix,
     )
     wb_results = weibull_analysis(
-        df, time_col=time_col, event_col=event_col, group_col=group_col, out_path=out_dir / "weibull_plot.png"
+        df,
+        time_col=time_col,
+        event_col=event_col,
+        group_col=group_col,
+        out_path=out_dir / "weibull_plot.png",
+        annotate_b10=True,
+        x_label=x_label,
+        title_prefix=title_prefix,
     )
 
     return km_results, wb_results

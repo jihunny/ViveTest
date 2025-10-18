@@ -15,6 +15,8 @@ def main():
     parser.add_argument("--group-col", type=str, default=None, help="Optional grouping column for subgroup analyses")
     parser.add_argument("--sheet", type=str, default=None, help="Excel sheet name (if not first)")
     parser.add_argument("--out-dir", type=Path, default=Path("outputs"), help="Directory for plots and CSV summaries")
+    parser.add_argument("--time-unit", type=str, default=None, help="Unit label for time axis, e.g., 'hours' or 'cycles'")
+    parser.add_argument("--title-prefix", type=str, default=None, help="Prefix to prepend to all plot titles (e.g., dataset name)")
     parser.add_argument("--dry-run", action="store_true", help="Only inspect the Excel file: list columns, dtypes, head, and optional group counts")
     parser.add_argument("--list-sheets", action="store_true", help="List available sheet names and exit")
 
@@ -53,6 +55,8 @@ def main():
         group_col=args.group_col,
         out_dir=args.out_dir,
         sheet=args.sheet,
+        time_unit=args.time_unit,
+        title_prefix=args.title_prefix,
     )
 
     print("Kaplan-Meier results:")
