@@ -1,0 +1,13 @@
+[project]
+name = "vivetest"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "pandas>=2.0",
+    "numpy>=1.26",
+    "matplotlib>=3.7",
+    "lifelines>=0.27",
+    "openpyxl>=3.1",
+]
